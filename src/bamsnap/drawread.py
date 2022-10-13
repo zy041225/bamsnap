@@ -298,8 +298,11 @@ class DrawRead():
 
     #def draw_del(self, dr, y1):
     def draw_del(self, dr, y1, start, end):
+        #print(self.del_list)
         for gpos in self.del_list:
-            if gpos not in range(start, end): continue
+            #print('del for:', start, end, gpos)
+            if gpos[0] not in range(start, end) and gpos[1] not in range(start, end): continue
+            #print('del for pass:', start, end, gpos)
             x1 = self.xscale.xmap[gpos[0]]['spos']
             x2 = self.xscale.xmap[gpos[1]]['spos']
             if self.read_thickness > 1:
