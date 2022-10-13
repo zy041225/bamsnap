@@ -188,30 +188,44 @@ class DrawRead():
             rst_color = self.opt['read_pos_color']
         return rst_color
 
-    def draw(self, dr, col1="C8C8C8", readcolorby=""):
+    #def draw(self, dr, col1="C8C8C8", readcolorby=""):
+    def draw(self, dr, start, end, col1="C8C8C8", readcolorby=""):
         if not self.flag_draw:
             if not self.has_interchrom_mate:
                 self.set_SV()
             
             y1 = int(self.get_scaled_y(self.yidx))
-            self.draw_read_body(dr, y1, col1, readcolorby)
-            self.draw_mismatch(dr, y1)
+            #self.draw_read_body(dr, y1, col1, readcolorby)
+            self.draw_read_body(dr, y1, col1, start, end, readcolorby)
+            #self.draw_mismatch(dr, y1)
+            self.draw_mismatch(dr, y1, start, end)
             if self.opt['show_soft_clipped'] and self.has_softclipped:
                 self.draw_softclipped(dr, y1)
             if self.has_ins:
-                self.draw_ins(dr, y1)
+                #self.draw_ins(dr, y1)
+                self.draw_ins(dr, y1, start, end)
             if self.has_del:
-                self.draw_del(dr, y1)
+                #self.draw_del(dr, y1)
+                self.draw_del(dr, y1, start, end)
             self.flag_draw = True
 
-    def draw_read_body(self, dr, y1, col1, readcolorby=""):
+    #def draw_read_body(self, dr, y1, col1, readcolorby=""):
+    def draw_read_body(self, dr, y1, col1, start, end, readcolorby=""):
         if self.opt['show_soft_clipped'] and self.has_softclipped:
-            x1 = self.xscale.xmap[self.g_spos_with_softclipped]['spos']
-            x2 = self.xscale.xmap[self.g_epos_with_softclipped]['epos']
+            bg = self.g_spos_with_softclipped
+            ed = self.g_epos_with_softclipped
+            #x1 = self.xscale.xmap[self.g_spos_with_softclipped]['spos']
+            #x2 = self.xscale.xmap[self.g_epos_with_softclipped]['epos']
         else:
-            x1 = self.xscale.xmap[self.g_spos]['spos']
-            x2 = self.xscale.xmap[self.g_epos]['epos']
-    
+            bg = self.g_spos
+            ed = self.g_epos
+            #x1 = self.xscale.xmap[self.g_spos]['spos']
+            #x2 = self.xscale.xmap[self.g_epos]['epos']
+        if bg < start: bg = start
+        if ed >= end: ed = end-1
+        x1 = self.xscale.xmap[bg]['spos']
+        x2 = self.xscale.xmap[ed]['epos']
+
         xy = []
         if self.read_thickness > 1:
             raht = self.read_arrowhead_thickness(self.read_thickness)
@@ -246,8 +260,10 @@ class DrawRead():
         else:
             dr.line([(x1, y1), (x2, y1)], fill=getrgb(col1), width=self.read_thickness)
 
-    def draw_mismatch(self, dr, y1):
+    #def draw_mismatch(self, dr, y1):
+    def draw_mismatch(self, dr, y1, start, end):
         for gpos in self.mismatch_list:
+            if gpos not in range(start, end): continue
             base_qual = self.readseqinfo[gpos][3]
             color_tag = "w" if base_qual < 15 else ""
             alt = self.readseqinfo[gpos][0]
@@ -268,8 +284,10 @@ class DrawRead():
                 x2 = x1 + 1
             dr.line([(x1, y1), (x2, y1)], fill=COLOR[color_tag+alt], width=self.read_thickness)
 
-    def draw_ins(self, dr, y1):
+    #def draw_ins(self, dr, y1):
+    def draw_ins(self, dr, y1, start, end):
         for gpos in self.ins_list:
+            if gpos not in range(start, end): continue
             x1 = self.xscale.xmap[gpos]['spos']
             dr.line([(x1, y1-self.read_thickness/2), (x1, y1+self.read_thickness/2)],
                     fill=COLOR['INS'], width=self.ins_width)
@@ -278,8 +296,10 @@ class DrawRead():
             dr.line([(x1-1, y1+self.read_thickness/2), (x1+2, y1+self.read_thickness/2)],
                     fill=COLOR['INS'], width=self.ins_width)
 
-    def draw_del(self, dr, y1):
+    #def draw_del(self, dr, y1):
+    def draw_del(self, dr, y1, start, end):
         for gpos in self.del_list:
+            if gpos not in range(start, end): continue
             x1 = self.xscale.xmap[gpos[0]]['spos']
             x2 = self.xscale.xmap[gpos[1]]['spos']
             if self.read_thickness > 1:

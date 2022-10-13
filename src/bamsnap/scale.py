@@ -15,7 +15,8 @@ class Xscale():
 
     def set_xmap(self):
         self.xmap = {}
-        for g_pos in range(self.spos-1000, self.epos+1000):
+        #for g_pos in range(self.spos-1000, self.epos+1000):
+        for g_pos in range(self.spos-1000, self.epos+1000+1):
             d = {}
             d['spos'] = int(round((g_pos - self.spos) * self.scale_x))
             d['epos'] = int(round((g_pos - self.spos + 1) * self.scale_x)) - 1

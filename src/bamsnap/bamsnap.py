@@ -346,8 +346,9 @@ class BamSnapPlot():
         dr.line([(0, h1), (w, h1)], fill=getrgb('000000'), width=1)
         return im
 
-    def get_bamplot_image(self, bam, pos1, image_w, xscale, refseq):
-        rset = DrawReadSet(bam, pos1['chrom'], pos1['g_spos'], pos1['g_epos'], xscale, refseq)
+    def get_bamplot_image(self, bam, pos1, image_w, xscale, margin, refseq):
+        #rset = DrawReadSet(bam, pos1['chrom'], pos1['g_spos'], pos1['g_epos'], xscale, refseq)
+        rset = DrawReadSet(bam, pos1['chrom'], pos1['g_spos'], pos1['g_epos'], xscale, self.opt['margin'], refseq)
         rset.read_gap_w = self.opt['read_gap_width']
         rset.read_gap_h = self.opt['read_gap_height']
         rset.read_thickness = self.opt['read_thickness']
@@ -470,7 +471,7 @@ class BamSnapPlot():
                 for bidx, bam in enumerate(bamlist):
                     if (bidx + 1) % 10 == 0:
                         self.opt['log'].info("..processing " + bam.filename + " (" + str(bidx + 1) + ")")
-                    ia_sub = self.get_bamplot_image(bam, pos1, image_w, xscale, refseq)
+                    ia_sub = self.get_bamplot_image(bam, pos1, image_w, xscale, self.opt['margin'], refseq)
                     ia = self.append_image(ia, ia_sub)
 
                     if not self.opt['border'] and self.opt['separator_height'] > 0:

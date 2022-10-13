@@ -35,12 +35,15 @@ class BaseTrack():
         dr.line([(x1, y), (x2, y)], fill=COLOR['SEPARATE'], width=1)
 
         vcls = ""
+        #print(self.spos, self.epos, self.g_len)
+        #print(self.refseq)
         for i in range(self.g_len):
             posi = self.spos + i
             base = self.refseq[posi]
             # x1 = int(i * self.scale_x) + int(self.scale_x/2) - int(fontsize[0]/2)
             x1 = self.xscale.xmap[posi]['spos']
             x2 = self.xscale.xmap[posi]['epos']
+            #print('draw_base: ', self.spos, i, base, posi, x1, x2)
             if vcls == "":
                 if (x2 - x1) > self.fontsize[0] + 5:
                     vcls = "textoutline"
@@ -53,11 +56,13 @@ class BaseTrack():
 
             if vcls == "textoutline":
                 xi = self.xscale.xmap[posi]['cpos'] - int(self.fontsize[0]/2)
+                #print(base, posi, self.xscale.xmap[posi]['cpos'])
                 dr.rectangle([(x1, y1), (x2, y2)], fill=(255,255,255,255), outline=COLOR['w'+base], width=1)
                 dr.text((xi, 0), base, font=self.font, fill=COLOR['d'+base])
                 
             elif vcls == "text":
                 xi = self.xscale.xmap[posi]['cpos'] - int(self.fontsize[0]/2)
+                #print(base, posi, self.xscale.xmap[posi]['cpos'])
                 dr.text((xi, 0), base, font=self.font, fill=COLOR['d'+base])
             elif vcls == "outline":
                 dr.rectangle([(x1, y1), (x2, y2)], fill=COLOR[base], outline=COLOR['w'+base], width=1)

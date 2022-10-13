@@ -48,7 +48,10 @@ class CoveragePlot():
         is_OK = self.readset.is_OK
 
         alt_pos_list = []
+        #print('covmap:', covmap)
+        #print('xscale.xmap: ', self.xscale.xmap)
         for posi in sorted(covmap.keys()):
+            if self.xscale.xmap[posi]['spos'] < 0: continue
             cov = covmap[posi][0]
             base_composition = covmap[posi][1]
             # x = int((posi - g_spos) * self.scale_x) + int(self.base_width/2)
@@ -58,6 +61,8 @@ class CoveragePlot():
                 y2 = round(h - (cov / max_cov * h), 0)
                 x1 = self.xscale.xmap[posi]['spos']
                 x2 = self.xscale.xmap[posi]['epos']
+                #print('covmap for: ', posi, x1, x2, getrgb(self.coverage_color))
+                if x1 < 0: continue
                 dr.rectangle([(x1, y1), (x2, y2)], fill=getrgb(self.coverage_color), outline=getrgb(self.coverage_color, 15), width=1)
                 # print(posi, cov, base_composition, len(base_composition.keys()), max_cov, refseq[posi])
                 if len(base_composition.keys()) > 1:
@@ -65,7 +70,7 @@ class CoveragePlot():
                     # print(len(base_composition.keys()))
                     # if is_OK(base_composition, refseq[posi]):
                     alt_pos_list.append((cov, posi))
-
+        
         for (cov, posi) in alt_pos_list:
             cov = covmap[posi][0]
             base_composition = covmap[posi][1]
@@ -78,6 +83,9 @@ class CoveragePlot():
                 for base in base_composition.keys():
                     h2 = base_composition[base] / max_cov * h
                     y21 = y11-h2
+                    #print('alt', base_composition, base, COLOR[base], x)
+                    if x < 0: continue
+                    #print('alt for: ', posi, x, base, COLOR[base])
                     dr.line([(x, y11), (x, y21)], fill=COLOR[base], width=self.xscale.base_width)
                     y11 = y21
 
@@ -159,10 +167,13 @@ class DrawReadSet():
     coverage_vaf = 10
     ridx = 0
     opt = {}
+    margin = 50
 
     STRAND_GROUP_LIST = ['pos_strand', 'neg_strand']
 
-    def __init__(self, bam, chrom, g_spos, g_epos, xscale, refseq="",  coverage_vaf=10):
+    def __init__(self, bam, chrom, g_spos, g_epos, xscale, margin=50, refseq="", coverage_vaf=10):
+        #print('margin: ', margin)
+        #print('refseq: ', refseq)
         self.samAlign = pysam.AlignmentFile(bam.filename, bam.getSamfileFlags())
         if bam.filename.endswith('.cram') and bam.getReference() is not None:
             self.samAlign = pysam.AlignmentFile(bam.filename, bam.getSamfileFlags(), reference_filename=bam.getReference())
@@ -182,6 +193,7 @@ class DrawReadSet():
         self.im = None
         self.xscale = xscale
         self.yidxmap = {}
+        self.margin = margin
         
         for gpos in range(self.g_spos-1000, self.g_epos+1000+1):
             self.readmap[gpos] = {}
@@ -192,7 +204,13 @@ class DrawReadSet():
         except KeyError:
             yidxmap = {}
             (g_spos, g_epos) = r.get_genomic_spos_epos()
-            for gpos in range(g_spos-self.read_gap_w, g_epos+1+self.read_gap_w):
+            #for gpos in range(g_spos-self.read_gap_w, g_epos+1+self.read_gap_w):
+            #for gpos in range(self.g_spos-1000, self.g_epos+1000+1):
+            for gpos in range(self.g_spos-self.margin, self.g_epos+self.margin+1):
+                try:
+                    self.readmap[gpos]
+                except KeyError:
+                    self.readmap[gpos] = {}
                 try:
                     self.readmap[gpos][group]
                 except KeyError:
@@ -211,7 +229,9 @@ class DrawReadSet():
                     except KeyError:
                         yidx = i
                         break
-            for gpos in range(g_spos-self.read_gap_w, g_epos+1+self.read_gap_w):
+            #for gpos in range(g_spos-self.read_gap_w, g_epos+1+self.read_gap_w):
+            #for gpos in range(self.g_spos-1000, self.g_epos+1000+1):
+            for gpos in range(self.g_spos-self.margin, self.g_epos+self.margin+1):
                 self.readmap[gpos][group].append(yidx)
             try:
                 self.yidxmap[group][r.id] = yidx
@@ -254,9 +274,15 @@ class DrawReadSet():
         return base_composition
 
     def add_covmap(self, group, read):
+        #print(self.g_spos-1000, self.g_epos+1000+1)
         for gpos in read.g_positions:
+            #print(self.g_spos-1000, self.g_epos+1000+1, gpos)
+            #if gpos not in range(self.g_spos-1000, self.g_epos+1000+1): continue
+            if gpos not in range(self.g_spos-self.margin, self.g_epos+self.margin+1): continue
+            #print('# %i' % (gpos))
             # base = read.readseqpos[gpos]
             base = read.readseqinfo[gpos][0]
+            #print(gpos, read.id, read.readseqinfo[gpos][0])
             self.covmap = init_dict(self.covmap, group)
             try:
                 prev_covmap = self.covmap[group][gpos]
@@ -357,7 +383,9 @@ class DrawReadSet():
                 r.yidx = self.get_yidx(r, group)
                 r.xscale = self.xscale
                 r.read_thickness = self.read_thickness
-                r.draw(dr, col1, readcolorby)
+                #r.draw(dr, col1, readcolorby)
+                #r.draw(dr, self.g_spos-1000, self.g_epos+1000+1, col1, readcolorby)
+                r.draw(dr, self.g_spos-self.margin, self.g_epos+self.margin+1, col1, readcolorby)
 
     
 
