@@ -586,6 +586,11 @@ class ReferenceSequence():
     def get_refseq_from_localfasta(self, pos1):
         spos = pos1['g_spos']-self.opt['margin'] - 500
         epos = pos1['g_epos']+self.opt['margin'] + 1 + 500
+        
+        if spos < 0: spos = 0
+        chr_length = len(self.fasta[pos1['chrom']])
+        if epos > chr_length: epos = chr_length
+
         seq = self.get_refseq_from_fasta(pos1['chrom'], spos, epos, self.opt['ref_index_rebuild'])
         i = 0
         refseq = {}
