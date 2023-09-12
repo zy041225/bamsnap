@@ -35,6 +35,8 @@ class DrawRead():
         self.readseq_with_softclipped = a.query_sequence
         
         self.base_qual = a.query_qualities
+        if self.base_qual == None: # when mapping reads fasta to ref
+            self.base_qual = [60]*len(self.readseq_with_softclipped)
         self.refseq = refseq
         # try:
         #     self.refseq = a.get_reference_sequence()
