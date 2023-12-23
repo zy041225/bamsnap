@@ -1,4 +1,6 @@
 # BamSnap
+
+**This is a modified version of Bamsnap which can support long read mapping alignment visualization.**
 <!--[![Build Status](https://travis-ci.org/bamsnap/bamsnap.svg?branch=develop)](https://travis-ci.org/bamsnap/bamsnap) 
 [![Code Health](https://landscape.io/github/bamsnap/bamsnap/develop/landscape.svg?style=flat)](https://landscape.io/github/bamsnap/bamsnap/develop) 
 [![Coverage Status](https://img.shields.io/codecov/c/github/bamsnap/bamsnap/develop.svg)](https://codecov.io/github/bamsnap/bamsnap?branch=develop)-->
@@ -18,23 +20,18 @@ For more details, see BamSnap [**Documentation**](http://bamsnap.readthedocs.io/
 
 ### Prerequisites
 * python 3.4+
-* [Pillow (Python Imaging Library)](https://pypi.org/project/Pillow/)
+* [Pillow (Python Imaging Library)](https://pypi.org/project/Pillow/), pillow==9.0 recommended 
 * [pysam](https://pypi.org/project/pysam/)
 * [pyfaidx](https://pypi.org/project/pyfaidx/)
 * [pytabix](https://pypi.org/project/pytabix/)
 
-### Install with pip
-
-```bash
-pip install bamsnap
-```
-* [pypi site for bamsnap](https://pypi.org/project/bamsnap/)
 
 ### Install with github
 
 ```
-git clone https://github.com/parklab/bamsnap
+git clone https://github.com/zy041225/bamsnap
 cd bamsnap
+pip install pillow==9.0
 python setup.py install
 ```
 
@@ -46,16 +43,6 @@ $ bamsnap -bam test.bam -pos 1:7364529 -out test.png
 ```
 
 For more details, see BamSnap [**Documentation**](http://bamsnap.readthedocs.io/en/latest).
-
-### Usage with docker
-```bash
-$ docker pull danielmsk/bamsnap
-$ docker run --rm -it -v /local_directory_path:/directory_path_in_image danielmsk/bamsnap bamsnap \
-    -bam /directory_path_in_image/test.bam \
-    -pos 1:7364529 \
-    -out /directory_path_in_image/test.png
-```
-
 
 
 ## Example Use Case
